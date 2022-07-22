@@ -1,39 +1,29 @@
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
-import java.util.Map;
+
 
 public class App {
     public static void main(String[] args) throws Exception {
         // Requisição na Api de filmes
-        String url = "https://api.mocki.io/v2/549a5d8b/Top250Movies";
-        URI endereco = URI.create(url);
-        var client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder(endereco).GET().build();
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-        String body = response.body();
-
+        
+        String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java/api/NASA-APOD.json";
         // Separando os dados do JSON
         JsonParser Json = new JsonParser();
-        List<Map<String, String>> ListaDeFilmes = Json.parse(body);
+        var http = new ClienteHttp();
+        var json = http.BuscaDados(url);
 
         // Exibindo os dados;
+        ExtratoraConteudo extrator = new ExtratoraConteudoNasa();
         var gerador = new GeradorFigurinhas();
-        for (Map<String, String> filme : ListaDeFilmes) {
-            String urlImagem = filme.get("image");
-            String titulo = filme.get("title");
-            
-            InputStream inputStream = new URL(urlImagem)
+        List<Conteudo> conteudos = extrator.extraiConteudos(json);
+        for (int i = 0;i<1;i ++)
+        {
+            Conteudo conteudo = conteudos.get(i);
+            InputStream inputStream = new URL(conteudo.getUrlImagem())
                     .openStream();
-            String nomeArquivo = titulo + ".png";
+            String nomeArquivo = conteudo.getTitulo() + ".png";
             gerador.Create(inputStream, nomeArquivo);
-            System.out.println(filme.get("title"));
         }
     }
 
